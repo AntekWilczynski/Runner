@@ -4,37 +4,15 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-
-using System.Windows.Threading; // add this for the timer
+using System.Windows.Threading;
 
 namespace Endless_Runner_Game
 {
     public partial class MainWindow : Window
     {
 
-        // create a new instance of the dispatcher timer class called gametimer
         DispatcherTimer gameTimer = new DispatcherTimer();
-
-        // create three new Rect class instance called player hit box and ground hit box and obstacle hit box
-        Rect playerHitBox;
-        Rect groundHitBox;
-        Rect przeszkodaHitBox;
-        Rect jeziorkoHitBox;
-
-        // create a new boolean called jumping, by default this will set to false
-        bool jumping;
-        // make a new integer called force and set the value to 20
-        int force = 20;
-        // make another integer called speed and set the value to 5
-        int speed = 5;
-        // create a new instance of the random class called rand
         Random rand = new Random();
-        // game over boolean
-        bool gameover = false;
-        // make a sprite int double variable, this will be used to swap the sprites for player
-        double spriteInt = 0;
-        int highscore = 0;
-        // make three image brush instances called player sprite, background sprite and obstacle sprite
         ImageBrush playerSprite = new ImageBrush();
         ImageBrush background1Sprite = new ImageBrush();
         ImageBrush groundSprite = new ImageBrush();
@@ -42,113 +20,95 @@ namespace Endless_Runner_Game
         ImageBrush background2Sprite = new ImageBrush();
         ImageBrush przeszkodaSprite = new ImageBrush();
         ImageBrush jeziorkoSprite = new ImageBrush();
-        //integer array which we will use to change the obstacle position on screen
-        int[] wysokoscPrzeszkody = { 650, 620, 600, 590,570  };
-        // empty integer called score
+
+        Rect playerHitBox;
+        Rect groundHitBox;
+        Rect przeszkodaHitBox;
+        Rect jeziorkoHitBox;
+        
+        bool jumping;
+        int force = 20;
+        int fallingSpeed = 5;
+        int speed = 10;
+        bool gameover = false;       
+        double playerAnimationSpriteCounter = 0;         
+        int highscore = 0;
         int score = 0;
+        int[] wysokoscPrzeszkody = { 650, 620, 600, 590, 570 };
 
         public MainWindow()
         {
             InitializeComponent();
-             //set the focus on my canvas from the WPF
-            myCanvas.Focus();
-             // assign the game engine event to the game timer tick
-            gameTimer.Tick += gameEngine;
-            // set the game timer interval to 20 milliseconds
-            gameTimer.Interval = TimeSpan.FromMilliseconds(20);
-            // first set the background sprite image
+            this.PreviewKeyDown += new KeyEventHandler(HandleEsc);
+            myCanvas.Focus();                                                  //set the focus on my canvas from the WPF
+            gameTimer.Tick += gameEngine;                                      // assign the game engine event to the game timer tick
+            gameTimer.Interval = TimeSpan.FromMilliseconds(20);                // set the game timer interval to 20 milliseconds
             background1Sprite.ImageSource = new BitmapImage(new Uri("pack://application:,,,/images/tlo.png"));
             background2Sprite.ImageSource = new BitmapImage(new Uri("pack://application:,,,/images/tlo.png"));
             sunSprite.ImageSource = new BitmapImage(new Uri("pack://application:,,,/images/slonko.png"));
             groundSprite.ImageSource = new BitmapImage(new Uri("pack://application:,,,/images/trawa.png"));
-          
-            // add the background sprite to both rectangles
-            background1.Fill = background1Sprite;
+            background1.Fill = background1Sprite;                              // add the background sprite to both rectangles
             background2.Fill = background2Sprite;
             sun.Fill = sunSprite;
             ground.Fill = groundSprite;
-            // run the start game function
+
             StartGame();
 
         }
-
+        private void HandleEsc(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape)
+                Close();
+        }
         private void Canvas_KeyDown(object sender, KeyEventArgs e)
         {
-            // if the game over boolean is true and the enter key is pressed
             if (e.Key == Key.Enter && gameover)
             {
-                // run the start game function
                 StartGame();
             }
         }
 
         private void Canvas_KeyUp(object sender, KeyEventArgs e)
         {
-            // if the space key is pressed AND jumping boolean is true AND player y location is above 260 pixels
             if (e.Key == Key.Space && !jumping && Canvas.GetTop(player) > 260)
             {
-                // set jumping to true
                 jumping = true;
-                // set force integer to 15
                 force = 15;
-                // set speed integer to -12
-                speed = -12;
-                // change the player sprite so it looks like he's jumping
-                playerSprite.ImageSource = new BitmapImage(new Uri("pack://application:,,,/images/newRunner_02.gif"));
+                fallingSpeed = -12;
+               
+                playerSprite.ImageSource = new BitmapImage(new Uri("pack://application:,,,/images/newRunner_02.gif"));  // change the player sprite so it looks like he's jumping
             }
 
         }
 
         private void StartGame()
         {
-            // this is the start game function
-
-            Canvas.SetLeft(background1, 0); // set the first background to 0
-            Canvas.SetLeft(background2, 3000); // set the second background to 3000
-
-            // set the player x to 110 and y to 140
+            Canvas.SetLeft(background1, 0);       // set the first background to 0
+            Canvas.SetLeft(background2, 3000);    // set the second background to 3000
             Canvas.SetLeft(player, 110);
             Canvas.SetTop(player, 300);
-
             Canvas.SetLeft(przeszkoda, 950);
             Canvas.SetTop(przeszkoda, 610);
             Canvas.SetLeft(jeziorko, 1750);
             Canvas.SetTop(jeziorko, 700);
-          
-            // set run sprite function to 1
             runSprite(1);
-
-            // set the obstacle sprite, load the image from the images folder
             jeziorkoSprite.ImageSource = new BitmapImage(new Uri("pack://application:,,,/images/jeziorko.png"));
-            jeziorko.Fill = jeziorkoSprite; // assign the obstacle sprite to the obstacle object 
+            jeziorko.Fill = jeziorkoSprite;                   // assign the obstacle sprite to the obstacle object 
             przeszkodaSprite.ImageSource = new BitmapImage(new Uri("pack://application:,,,/images/przeszkoda.png"));
-            przeszkoda.Fill = przeszkodaSprite; // assign the obstacle sprite to the obstacle object 
-    
-            // set jumping to false
+            przeszkoda.Fill = przeszkodaSprite;               // assign the obstacle sprite to the obstacle object 
             jumping = false;
-            // set game over to false
             gameover = false;
-            // set score to 0
             score = 0;
-            // set the score text to the score integer
             scoreText.Content = "Punkty: " + score;
             highScoreText.Content = "Rekord: " + highscore;
             infoText.Content = " ";
-            // start the game timer
             gameTimer.Start();
         }
 
         private void runSprite(double i)
         {
-            // this is the run sprite function, this function takes one argument inside its brackets
-            // it takes a double variable called i
-            // we will use this i to change the images for the player
-
-            // below is the switch statement that will change the player sprite
-            // when the i value changes between 1 and 8 it will assign appropriate sprite to the player sprite
             switch (i)
             {
-
                 case 1:
                     playerSprite.ImageSource = new BitmapImage(new Uri("pack://application:,,,/images/newRunner_01.gif"));
                     break;
@@ -173,25 +133,21 @@ namespace Endless_Runner_Game
                 case 8:
                     playerSprite.ImageSource = new BitmapImage(new Uri("pack://application:,,,/images/newRunner_08.gif"));
                     break;
-
             }
-            // finally assign the player rectangle to the player sprite
             player.Fill = playerSprite;
         }
 
+
+
         private void gameEngine(object sender, EventArgs e)
         {
-            // move the player character down using the speed integer
-            Canvas.SetTop(player, Canvas.GetTop(player) + speed);
-            // move the background 3 pixels to the left each tick
-            Canvas.SetLeft(background1, Canvas.GetLeft(background1) - 3);
+            Canvas.SetTop(player, Canvas.GetTop(player) + fallingSpeed);        // move the player character down using the speed integer
+            Canvas.SetLeft(background1, Canvas.GetLeft(background1) - 3);       // move the background 3 pixels to the left each tick
             Canvas.SetLeft(background2, Canvas.GetLeft(background2) - 3);
-            // move the obstacle rectangle to the left 12 pixels per tick
-            Canvas.SetLeft(przeszkoda, Canvas.GetLeft(przeszkoda) - 12);
-            Canvas.SetLeft(jeziorko, Canvas.GetLeft(jeziorko) - 12);
-            // link the score text label to the score integer
-            scoreText.Content = "Punkty: " + score;
-            
+            Canvas.SetLeft(przeszkoda, Canvas.GetLeft(przeszkoda) - speed);     // move the obstacle rectangle to the left 12 pixels per tick
+            Canvas.SetLeft(jeziorko, Canvas.GetLeft(jeziorko) - speed);
+            scoreText.Content = "Punkty: " + score;  // link the score text label to the score integer
+            highScoreText.Content = "Rekord: " + highscore;
             // assign the player hit box to the player, ground hit box to the ground rectangle and obstacle hit box to the obstacle rectangle
             playerHitBox = new Rect(Canvas.GetLeft(player), Canvas.GetTop(player), player.Width, player.Height);
             groundHitBox = new Rect(Canvas.GetLeft(ground), Canvas.GetTop(ground), ground.Width, ground.Height);
@@ -203,21 +159,21 @@ namespace Endless_Runner_Game
             if (playerHitBox.IntersectsWith(groundHitBox))
             {
                 //if the player is on the ground set the speed to 0
-                speed = 0;
+                fallingSpeed = 0;
                 // place the character on top of the ground rectangle
                 Canvas.SetTop(player, Canvas.GetTop(ground) - player.Height);
                 // set jumping to false
                 jumping = false;
                 // add .5 to the sprite int double
-                spriteInt += .5;
+                playerAnimationSpriteCounter += .5;
                 // if the sprite int goes above 8
-                if (spriteInt > 8)
+                if (playerAnimationSpriteCounter > 8)
                 {
                     // reset the sprite int to 1
-                    spriteInt = 1;
+                    playerAnimationSpriteCounter = 1;
                 }
                 // pass the sprite int values to the run sprite function
-                runSprite(spriteInt);
+                runSprite(playerAnimationSpriteCounter);
             }
 
             //if the player hit the obstacle
@@ -242,14 +198,14 @@ namespace Endless_Runner_Game
             if (jumping)
             {
                 // set speed integer to -9 so the player will go upwards
-                speed = -15;
+                fallingSpeed = -15;
                 // reduce the force integer
                 force--;
             }
             else
             {
                 // if jumping is not true then set speed to 12
-                speed = 10;
+                fallingSpeed = 10;
             }
 
             // if force is less than 0 
@@ -302,22 +258,25 @@ namespace Endless_Runner_Game
                 Canvas.SetTop(jeziorko, 700);
                 // add 1 to the score
                 score += 1;
+                if (score > highscore)
+                    highscore = score;
             }
-
-            // if the game over boolean is set to true
+            if (score>10)speed = score;
+        
             if (gameover)
             {
                 // draw a black border around the obstacle
                 // and set the border size to 1 pixel
                 przeszkoda.Stroke = Brushes.Black;
-                przeszkoda.StrokeThickness = 1;
-
+                przeszkoda.StrokeThickness = 3;
+                speed = 10;
                 // draw a red border around the player
                 // and set the border size to 1 pixel
                 player.Stroke = Brushes.Red;
-                player.StrokeThickness = 1;
+                player.StrokeThickness = 3;
                 // add the following to the existing score text label
-                infoText.Content += " Naciśnij [Enter]";
+                infoText.Content = "[Enter] Jeszcze raz,  [Esc] Wyjście";
+
             }
             else
             {

@@ -5,19 +5,19 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Endless_Runner_Game"
         mc:Ignorable="d"
- Title="Endless Runner by Moo ICT" Height="1020" Width="1650" WindowStartupLocation="Manual" Left="0" Top="0">
+ Title="Endless Runner by Moo ICT"  WindowState="Maximized" WindowStyle="None">
     <Canvas Name="myCanvas" Focusable="True" KeyDown="Canvas_KeyDown" KeyUp="Canvas_KeyUp" Background="LightBlue">
 
         <Rectangle Name="background1" Height="700" Width="3000" Fill="Blue" />
         <Rectangle Name="background2" Height="700" Width="3000" Fill="Blue" Canvas.Left="3000" />
-        <Rectangle Name="ground" Height="320" Width="1650" Fill="Brown" Canvas.Top="700" Canvas.Left="0" />
+        <Rectangle Name="ground" Height="360" Width="1750" Fill="Brown" Canvas.Top="700" Canvas.Left="0" />
         <Rectangle Name="sun" Height="130" Width="130" Fill="Yellow" Canvas.Top="-5" Canvas.Left="1200" />
         <Rectangle Name="player" Height="99" Width="67" Fill="Brown" />
         <Rectangle Name="przeszkoda" Height="300" Width="90" Fill="Red" />
         <Rectangle Name="jeziorko" Height="160" Width="300" Fill="Blue" />
 
         <Label Name="scoreText" FontSize="50" FontWeight="Bold" Content="Punkty: 0" />
-        <Label Name="infoText" FontSize="50" FontWeight="Bold" Content="" Canvas.Left="721" Canvas.Top="322" />
+        <Label Name="infoText" FontSize="50" FontWeight="Bold" Canvas.Left="400" Canvas.Top="322" />
         <Label Name="highScoreText" FontSize="50" FontWeight="Bold" Content="Rekord: 0" Canvas.Left="1399" />
 
     </Canvas>
